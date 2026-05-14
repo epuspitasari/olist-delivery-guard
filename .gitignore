@@ -1,0 +1,8 @@
+env_pacmann/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+data/raw/
+data/interim/
+data/processed/
+.DS_Store
