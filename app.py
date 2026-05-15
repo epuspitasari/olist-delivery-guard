@@ -62,45 +62,46 @@ with st.form("input_form"):
 
 # --- 5. LOGIKA PREDIKSI ---
 if submitted:
-    # A. Buat dictionary awal (Logika One-Hot Encoding manual)
-    # Jika user pilih 'Boleto', semua kolom payment_type_* di bawah akan otomatis jadi 0
-    input_data = {
-        'order_purchase_month': month,
-        'order_purchase_dayofweek': day_of_week,
-        'is_sp_district': is_sp_val,
-        'payment_installments': installments,
-        'payment_value': payment_val,
-        'payment_type_credit_card': 1 if pay_type == "Credit Card" else 0,
-        'payment_type_debit_card': 1 if pay_type == "Debit Card" else 0,
-        'payment_type_not_defined': 0,
-        'payment_type_voucher': 1 if pay_type == "Voucher" else 0
-    }
-    
-    # B. Konversi ke DataFrame
-    df_predict = pd.DataFrame([input_data])
-    
-    try:
-        # C. PENYELAMAT: Sinkronisasi urutan fitur dengan Scaler
-        fitur_seharusnya = scaler.feature_names_in_.tolist()
+    # Kita bungkus semua proses di bawah spinner ini
+    with st.spinner('Sedang menganalisis data logistik...'):
+        # A. Buat dictionary awal
+        input_data = {
+            'order_purchase_month': month,
+            'order_purchase_dayofweek': day_of_week,
+            'is_sp_district': is_sp_val,
+            'payment_installments': installments,
+            'payment_value': payment_val,
+            'payment_type_credit_card': 1 if pay_type == "Credit Card" else 0,
+            'payment_type_debit_card': 1 if pay_type == "Debit Card" else 0,
+            'payment_type_not_defined': 0,
+            'payment_type_voucher': 1 if pay_type == "Voucher" else 0
+        }
         
-        # D. Reindex memastikan urutan kolom TEPAT SAMA dengan saat training di NB 4
-        df_predict = df_predict.reindex(columns=fitur_seharusnya, fill_value=0)
+        # B. Konversi ke DataFrame
+        df_predict = pd.DataFrame([input_data])
         
-        # E. Scaling Data
-        df_predict_scaled = scaler.transform(df_predict)
-        
-        # F. Eksekusi Model
-        prediction = model.predict(df_predict_scaled)[0]
-        probability = model.predict_proba(df_predict_scaled)[0][1]
+        try:
+            # C. Sinkronisasi urutan fitur
+            fitur_seharusnya = scaler.feature_names_in_.tolist()
+            
+            # D. Reindex
+            df_predict = df_predict.reindex(columns=fitur_seharusnya, fill_value=0)
+            
+            # E. Scaling Data
+            df_predict_scaled = scaler.transform(df_predict)
+            
+            # F. Eksekusi Model
+            prediction = model.predict(df_predict_scaled)[0]
+            probability = model.predict_proba(df_predict_scaled)[0][1]
 
-        # --- 6. TAMPILKAN HASIL ---
-        st.subheader("📊 Hasil Analisis AI")
-        if prediction == 1:
-            st.error(f"### STATUS: BERISIKO TERLAMBAT ({probability*100:.2f}%)")
-            st.write("Saran: Segera koordinasi dengan tim gudang untuk prioritas packing.")
-        else:
-            st.success(f"### STATUS: TEPAT WAKTU (Risiko: {probability*100:.2f}%)")
-            st.write("Pesanan ini berada dalam zona aman logistik.")
+            # --- 6. TAMPILKAN HASIL ---
+            st.subheader("📊 Hasil Analisis AI")
+            if prediction == 1:
+                st.error(f"### STATUS: BERISIKO TERLAMBAT ({probability*100:.2f}%)")
+                st.write("Saran: Segera koordinasi dengan tim gudang untuk prioritas packing.")
+            else:
+                st.success(f"### STATUS: TEPAT WAKTU (Risiko: {probability*100:.2f}%)")
+                st.write("Pesanan ini berada dalam zona aman logistik.")
 
-    except Exception as e:
-        st.error(f"⚠️ Kesalahan Teknis: {e}")
+        except Exception as e:
+            st.error(f"⚠️ Kesalahan Teknis: {e}")

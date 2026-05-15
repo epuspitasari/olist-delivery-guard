@@ -8,13 +8,13 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- 2. TAMPILAN FRONTEND ---
+# --- 2. TAMPILKAN FRONTEND ---
 st.title("🚚 Olist Delivery Guard")
-st.markdown("Mode: **Frontend Terpisah (API)**")
+st.markdown("Mode: **Frontend Terpisah (Menggunakan API)**")
 
 st.divider()
 
-# --- 3. FORM INPUT USER (Disamakan dengan versi App) ---
+# --- 3. FORM INPUT USER ---
 with st.form("input_form"):
     col1, col2, col3 = st.columns(3)
     
@@ -39,31 +39,35 @@ with st.form("input_form"):
 
 # --- 4. LOGIKA PENGIRIMAN KE API ---
 if submitted:
-    payload = {
-        "month": int(month),
-        "day_of_week": int(day_of_week),
-        "is_sp": 1 if is_sp == "Ya" else 0,
-        "installments": int(installments),
-        "payment_value": float(payment_val),
-        "pay_type": pay_type
-    }
-    
-    try:
-        # Panggil API
-        response = requests.post("http://127.0.0.1:8000/predict", json=payload)
+    # Kita tambahkan spinner supaya user tahu aplikasi sedang menunggu jawaban dari API
+    with st.spinner('Menghubungi server AI untuk analisis...'):
+        # Membungkus data menjadi 'payload' (paket data)
+        payload = {
+            "month": int(month),
+            "day_of_week": int(day_of_week),
+            "is_sp": 1 if is_sp == "Ya" else 0,
+            "installments": int(installments),
+            "payment_value": float(payment_val),
+            "pay_type": pay_type
+        }
         
-        if response.status_code == 200:
-            res = response.json()
-            st.subheader("📊 Hasil Analisis AI (via API)")
+        try:
+            # Mengirim data ke API yang sedang jalan di localhost:8000
+            response = requests.post("http://127.0.0.1:8000/predict", json=payload)
             
-            if res["status"] == "Late":
-                st.error(f"### STATUS: BERISIKO TERLAMBAT ({res['probability']*100:.2f}%)")
-                st.write("Saran: Segera koordinasi dengan tim gudang.")
+            if response.status_code == 200:
+                res = response.json()
+                st.subheader("📊 Hasil Analisis AI (via API)")
+                
+                # Menampilkan hasil berdasarkan jawaban dari api.py
+                if res["status"] == "Late":
+                    st.error(f"### STATUS: BERISIKO TERLAMBAT ({res['probability']*100:.2f}%)")
+                    st.write("Saran: Segera koordinasi dengan tim gudang.")
+                else:
+                    st.success(f"### STATUS: TEPAT WAKTU (Risiko: {res['probability']*100:.2f}%)")
+                    st.write("Pesanan berada dalam zona aman.")
             else:
-                st.success(f"### STATUS: TEPAT WAKTU (Risiko: {res['probability']*100:.2f}%)")
-                st.write("Pesanan berada dalam zona aman.")
-        else:
-            st.error("API merespon dengan kesalahan.")
-            
-    except requests.exceptions.ConnectionError:
-        st.error("❌ Koneksi Gagal! Pastikan `api.py` sudah jalan di terminal (uvicorn).")
+                st.error(f"⚠️ API merespon dengan kesalahan (Status: {response.status_code})")
+                
+        except requests.exceptions.ConnectionError:
+            st.error("❌ Koneksi Gagal! Pastikan `api.py` sudah jalan di terminal dengan perintah: `uvicorn api:app --reload`")
