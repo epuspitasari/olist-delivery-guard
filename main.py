@@ -39,9 +39,7 @@ with st.form("input_form"):
 
 # --- 4. LOGIKA PENGIRIMAN KE API ---
 if submitted:
-    # Kita tambahkan spinner supaya user tahu aplikasi sedang menunggu jawaban dari API
     with st.spinner('Menghubungi server AI untuk analisis...'):
-        # Membungkus data menjadi 'payload' (paket data)
         payload = {
             "month": int(month),
             "day_of_week": int(day_of_week),
@@ -52,22 +50,36 @@ if submitted:
         }
         
         try:
-            # Mengirim data ke API yang sedang jalan di localhost:8000
             response = requests.post("http://127.0.0.1:8000/predict", json=payload)
             
             if response.status_code == 200:
                 res = response.json()
                 st.subheader("📊 Hasil Analisis AI (via API)")
                 
-                # Menampilkan hasil berdasarkan jawaban dari api.py
                 if res["status"] == "Late":
                     st.error(f"### STATUS: BERISIKO TERLAMBAT ({res['probability']*100:.2f}%)")
                     st.write("Saran: Segera koordinasi dengan tim gudang.")
                 else:
                     st.success(f"### STATUS: TEPAT WAKTU (Risiko: {res['probability']*100:.2f}%)")
                     st.write("Pesanan berada dalam zona aman.")
+                
+                # Menampilkan Insight otomatis dari API (jika ada)
+                if "insights" in res:
+                    st.info(f"💡 **AI Insight:** {res['insights']}")
+                    
             else:
                 st.error(f"⚠️ API merespon dengan kesalahan (Status: {response.status_code})")
                 
         except requests.exceptions.ConnectionError:
-            st.error("❌ Koneksi Gagal! Pastikan `api.py` sudah jalan di terminal dengan perintah: `uvicorn api:app --reload`")
+            st.error("❌ Koneksi Gagal! Pastikan `api.py` sudah jalan di terminal.")
+
+st.divider()
+
+# --- 5. INFORMASI TAMBAHAN (INSIGHTS) ---
+with st.expander("ℹ️ Mengapa bulan atau lokasi tertentu berisiko tinggi?"):
+    st.markdown("""
+    Berdasarkan pola data historis e-commerce di Brazil:
+    * **Oktober - Desember (Bulan 10-12):** Periode *peak season* (Black Friday & Natal). Volume paket yang membeludak sering menyebabkan keterlambatan logistik.
+    * **Januari - Februari (Bulan 1-2):** Efek sisa pengiriman akhir tahun dan adanya musim liburan serta Karnaval di Brazil yang mempengaruhi operasional kurir.
+    * **Lokasi (São Paulo):** Meskipun SP adalah pusat logistik, pengiriman ke luar wilayah ini menempuh jarak jauh dengan infrastruktur jalan yang menantang, sehingga risiko keterlambatan meningkat.
+    """)

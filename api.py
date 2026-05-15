@@ -26,7 +26,6 @@ class DeliveryInput(BaseModel):
 @app.post("/predict")
 def get_prediction(data: DeliveryInput):
     # Logika 9 Fitur (Tanpa Boleto secara eksplisit)
-    # Jika user pilih 'Boleto', maka semua payment_type_* di bawah akan bernilai 0
     input_dict = {
         'order_purchase_month': data.month,
         'order_purchase_dayofweek': data.day_of_week,
@@ -43,10 +42,7 @@ def get_prediction(data: DeliveryInput):
     
     try:
         # --- PENYELAMAT: SINKRONISASI FITUR ---
-        # Mengambil urutan 9 kolom asli dari Scaler
         fitur_seharusnya = scaler.feature_names_in_.tolist()
-        
-        # Memaksa df_input mengikuti urutan fitur_seharusnya
         df_input = df_input.reindex(columns=fitur_seharusnya, fill_value=0)
         
         # Preprocessing & Prediksi
@@ -54,12 +50,18 @@ def get_prediction(data: DeliveryInput):
         prediction = int(model.predict(df_scaled)[0])
         probability = float(model.predict_proba(df_scaled)[0][1])
         
+        # --- INTEGRASI INSIGHTS ---
+        # Kita masukkan penjelasan logistik ke dalam response
+        insights = (
+            "Risiko meningkat pada bulan 10-12 (Peak Season/Natal) dan bulan 1-2 (Karnaval/Liburan Summer). "
+            "Pengiriman luar São Paulo juga menempuh jarak yang lebih menantang."
+        )
+        
         return {
             "status": "Late" if prediction == 1 else "On Time",
             "probability": probability,
-            "message": "Prediksi berhasil dihitung"
+            "message": "Prediksi berhasil dihitung",
+            "insights": insights  # Informasi tambahan dikirim di sini
         }
     except Exception as e:
         return {"error": str(e)}
-
-# Jalankan dengan: uvicorn nama_file_api:app --reload
