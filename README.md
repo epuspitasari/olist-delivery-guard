@@ -62,7 +62,7 @@ Untuk mengukur nilai riil dari model Machine Learning, dilakukan simulasi finans
    * Model berhasil menangkap secara akurat **502 paket berisiko** (*True Positive*) untuk dimitigasi dengan biaya rendah, dan hanya meluputkan **311 paket** (*False Negative*).
    * **Total Pengeluaran setelah Mitigasi:** (311 x R$ 50.00) + (502 x R$ 15.00) = **R$ 23,080.00**
 
-### 📊 Kesimpulan Nilai Bisnis:
+### Kesimpulan Nilai Bisnis:
 * **Total Biaya yang Diselamatkan:** R$ 40,650.00 - R$ 23,080.00 = **R$ 17,570.00** *(Catatan: Jika didasarkan pada penyelamatan kerugian murni dari porsi data bocor yang berhasil diintervensi, total kas operasional yang diamankan bernilai R$ 25,100.00 sebelum dikurangi pengeluaran biaya operasional mitigasi).*
 * **Efisiensi Finansial Operasional:** Penggunaan model ini sukses memberikan efisiensi biaya logistik sebesar **61.75%** bagi Olist Brasil.
 
