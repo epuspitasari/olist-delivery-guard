@@ -43,7 +43,7 @@ Untuk menjaga integritas model, proyek ini menggunakan 3 dataset utama yang sali
 
 ## 5. Performa & Insight Utama
 - **Insight Geografis & Temporal**: Wilayah di luar negara bagian São Paulo memiliki risiko keterlambatan signifikan lebih tinggi karena tantangan jarak infrastruktur. Risiko pengiriman juga memuncak pada masa *Peak Season* (Oktober–Desember).
-- **Strategi Evaluasi**: Fokus utama dioptimasikan pada metrik **Recall (0.62)** pada Test Set untuk meminimalkan *False Negatives* (keterlambatan yang luput dari pengawasan AI).
+- **Strategi Evaluasi**: Fokus utama dioptimasikan pada metrik **Recall (0.62)** pada Test Set untuk meminimalkan *False Negatives* (keterlambatan yang luput dari pengawasan ML).
 - **Kesimpulan Model**: Model AdaBoost terbukti paling stabil (*robust*) mendeteksi risiko di tengah kondisi ketidakseimbangan kelas (*imbalanced data* ~7.8% kasus telat).
 
 ---
@@ -54,7 +54,7 @@ Untuk mengukur nilai riil dari model Machine Learning, dilakukan simulasi finans
 * **Cost of False Positive (CFP = R$ 15.00)**: Biaya mitigasi/prioritas pengiriman jika sistem memprediksi telat namun aslinya bisa tepat waktu.
 
 ### Perbandingan Penghematan Finansial:
-1. **Tanpa Model AI (Model Baseline/Status Quo)**
+1. **Tanpa Model ML (Model Baseline/Status Quo)**
    * Sistem menganggap semua pengiriman aman (*False Negative* massal).
    * **Total Kerugian Finansial:** 813 paket x R$ 50.00 = **R$ 40,650.00**
 
